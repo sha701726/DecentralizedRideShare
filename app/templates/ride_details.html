@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Ride Details - DeCarpooling{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('search_ride') }}">Search Rides</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Ride Details</li>
+            </ol>
+        </nav>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Ride Details</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Route Information</h4>
+                        <div class="mb-2">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <strong>From:</strong> {{ ride.start_location }}
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-map-marker-alt text-success me-2"></i>
+                            <strong>To:</strong> {{ ride.end_location }}
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-calendar me-2"></i>
+                            <strong>Date:</strong> {{ ride.departure_time.strftime('%B %d, %Y') }}
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Time:</strong> {{ ride.departure_time.strftime('%I:%M %p') }}
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-chair me-2"></i>
+                            <strong>Available Seats:</strong> {{ ride.available_seats }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Driver Information</h4>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-user fa-2x text-light"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ ride.driver.username }}</h5>
+                                <div class="mb-1">
+                                    {% if ride.driver.reputation %}
+                                        {% for i in range(5) %}
+                                            {% if i < ride.driver.reputation|int %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% elif (i + 0.5) < ride.driver.reputation %}
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-1">{{ ride.driver.reputation }}</span>
+                                    {% else %}
+                                        <span class="text-muted">No ratings yet</span>
+                                    {% endif %}
+                                </div>
+                                <div class="small text-muted">
+                                    <i class="fas fa-user-clock me-1"></i>Member since {{ ride.driver.created_at.strftime('%b %Y') }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if ride.driver.ethereum_address %}
+                        <div class="mb-2">
+                            <i class="fab fa-ethereum me-2"></i>
+                            <strong>ETH Address:</strong>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                {{ ride.driver.ethereum_address }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="price-section p-3 bg-light rounded mb-4">
+                    <h4>Price</h4>
+                    <div class="d-flex align-items-center">
+                        <span class="display-6 me-2">{{ ride.price }} ETH</span>
+                        <span class="text-muted">per seat</span>
+                    </div>
+                    <div id="price-usd" class="text-muted"></div>
+                </div>
+                
+                {% if blockchain_data %}
+                <div class="blockchain-section p-3 bg-dark rounded mb-4">
+                    <h4 class="text-light mb-3">Blockchain Information</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-light mb-2">
+                                <i class="fas fa-link me-2"></i>
+                                <strong>Smart Contract ID:</strong> {{ ride.smart_contract_id }}
+                            </div>
+                            <div class="text-light mb-2">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Status:</strong> 
+                                {% if blockchain_data.is_available %}
+                                <span class="badge bg-success">Available</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Not Available</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-light mb-2">
+                                <i class="fab fa-ethereum me-2"></i>
+                                <strong>Price (Wei):</strong> {{ blockchain_data.price }}
+                            </div>
+                            <div class="text-light mb-2">
+                                <i class="fas fa-chair me-2"></i>
+                                <strong>Available Seats:</strong> {{ blockchain_data.available_seats }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Booking Form -->
+                {% if current_user.is_authenticated and ride.is_active and ride.available_seats > 0 and not user_booking %}
+                <div class="booking-section p-4 border rounded">
+                    <h4 class="mb-3">Book This Ride</h4>
+                    <form method="POST" action="{{ url_for('book_ride', ride_id=ride.id) }}">
+                        <div class="mb-3">
+                            <label for="seats" class="form-label">Number of Seats</label>
+                            <select class="form-select" id="seats" name="seats">
+                                {% for i in range(1, ride.available_seats + 1) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Total Price</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="total_price" value="{{ ride.price }}" readonly>
+                                <span class="input-group-text">ETH</span>
+                            </div>
+                        </div>
+                        
+                        {% if current_user.ethereum_address %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt me-2"></i>Book Now
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            You need to add an Ethereum wallet address to your profile before booking.
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-primary">
+                                Update Profile
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                {% elif user_booking %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>You've booked this ride!</strong>
+                    <p class="mb-0 mt-2">
+                        Booking status: <span class="badge bg-primary">{{ user_booking.status }}</span>
+                    </p>
+                    {% if user_booking.transaction_hash %}
+                    <p class="mb-0 mt-1">
+                        Transaction: 
+                        <a href="https://etherscan.io/tx/{{ user_booking.transaction_hash }}" target="_blank" class="alert-link">
+                            {{ user_booking.transaction_hash[:10] }}...{{ user_booking.transaction_hash[-6:] }}
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+                {% elif not ride.is_active %}
+                <div class="alert alert-secondary">
+                    <i class="fas fa-ban me-2"></i>
+                    This ride is no longer available for booking.
+                </div>
+                {% elif ride.available_seats <= 0 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    All seats for this ride have been booked.
+                </div>
+                {% elif not current_user.is_authenticated %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Please <a href="{{ url_for('login') }}" class="alert-link">login</a> to book this ride.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update total price based on number of seats
+    const seatsSelect = document.getElementById('seats');
+    const totalPriceInput = document.getElementById('total_price');
+    const ridePrice = {{ ride.price }};
+    
+    if (seatsSelect && totalPriceInput) {
+        seatsSelect.addEventListener('change', function() {
+            const seats = parseInt(this.value);
+            const totalPrice = (seats * ridePrice).toFixed(6);
+            totalPriceInput.value = totalPrice;
+        });
+    }
+    
+    // Fetch ETH price and show USD equivalent
+    async function showPriceInUsd() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+            const data = await response.json();
+            const ethPrice = data.ethereum.usd;
+            
+            const priceUsdElement = document.getElementById('price-usd');
+            const priceEth = {{ ride.price }};
+            const priceUsd = (priceEth * ethPrice).toFixed(2);
+            
+            priceUsdElement.textContent = `≈ $${priceUsd} USD per seat`;
+        } catch (error) {
+            console.error('Error fetching ETH price:', error);
+        }
+    }
+    
+    showPriceInUsd();
+</script>
+{% endblock %}

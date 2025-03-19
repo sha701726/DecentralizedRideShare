@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}DeCarpooling - Decentralized Carpooling Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <!-- Hero Section -->
+    <div class="col-12 text-center mb-5">
+        <div class="p-5 bg-dark rounded-3 mb-4">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Decentralized Carpooling</h1>
+                <p class="fs-4">Share rides using blockchain technology. Secure, transparent, and trustless.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="{{ url_for('search_ride') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Find a Ride
+                    </a>
+                    <a href="{{ url_for('offer_ride') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Offer a Ride
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="col-12 mb-5">
+        <h2 class="text-center mb-4">Why Choose DeCarpooling?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-lock fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Secure Transactions</h5>
+                        <p class="card-text">All payments are handled through smart contracts on the Ethereum blockchain, ensuring secure and transparent transactions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Decentralized Storage</h5>
+                        <p class="card-text">Your data is stored on IPFS, a distributed file system that ensures your information remains secure and accessible.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Community Governance</h5>
+                        <p class="card-text">The platform is governed by its users through a DAO (Decentralized Autonomous Organization).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Rides Section -->
+    <div class="col-12 mb-5">
+        <h2 class="text-center mb-4">Latest Available Rides</h2>
+        {% if latest_rides %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Departure</th>
+                            <th>Price (ETH)</th>
+                            <th>Seats</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ride in latest_rides %}
+                            <tr>
+                                <td>{{ ride.start_location }}</td>
+                                <td>{{ ride.end_location }}</td>
+                                <td>{{ ride.departure_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ ride.price }}</td>
+                                <td>{{ ride.available_seats }}</td>
+                                <td>
+                                    <a href="{{ url_for('ride_details', ride_id=ride.id) }}" class="btn btn-sm btn-primary">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('search_ride') }}" class="btn btn-outline-primary">
+                    View All Rides
+                </a>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <p class="mb-0">No rides available at the moment.</p>
+                <a href="{{ url_for('offer_ride') }}" class="btn btn-primary mt-2">
+                    Be the first to offer a ride!
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="col-12">
+        <h2 class="text-center mb-4">How It Works</h2>
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-user-plus fa-2x"></i>
+                </div>
+                <h4>Create an Account</h4>
+                <p>Sign up with your email and connect your Ethereum wallet to get started.</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-search fa-2x"></i>
+                </div>
+                <h4>Find or Offer Rides</h4>
+                <p>Search for rides that match your route or offer seats in your vehicle.</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-money-bill-wave fa-2x"></i>
+                </div>
+                <h4>Secure Payment</h4>
+                <p>Pay with cryptocurrency through secure smart contracts on the Ethereum blockchain.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Login - DeCarpooling{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Login</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Connect with Ethereum</h5>
+            </div>
+            <div class="card-body text-center">
+                <p>Login using your Ethereum wallet</p>
+                <button id="connectWallet" class="btn btn-outline-primary">
+                    <i class="fab fa-ethereum me-2"></i>Connect Wallet
+                </button>
+                <div id="walletInfo" class="mt-3" style="display: none;">
+                    <div class="alert alert-success">
+                        <p class="mb-1"><strong>Connected Account:</strong></p>
+                        <p id="accountAddress" class="mb-0 text-break"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Web3 wallet connection
+    document.getElementById('connectWallet').addEventListener('click', async function() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                // Request account access
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                const account = accounts[0];
+                
+                // Display account info
+                document.getElementById('accountAddress').textContent = account;
+                document.getElementById('walletInfo').style.display = 'block';
+                
+                // You could redirect to a special login endpoint that verifies the wallet
+                // For now, we'll just show the connected wallet info
+            } catch (error) {
+                console.error(error);
+                alert('Error connecting to wallet: ' + error.message);
+            }
+        } else {
+            alert('Please install MetaMask or another Ethereum wallet to use this feature');
+        }
+    });
+</script>
+{% endblock %}

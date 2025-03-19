@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Search Rides - DeCarpooling{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="card sticky-top" style="top: 20px;">
+            <div class="card-header">
+                <h4 class="mb-0">Search Rides</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('search_ride') }}">
+                    <div class="mb-3">
+                        <label for="start_location" class="form-label">Start Location</label>
+                        <input type="text" class="form-control" id="start_location" name="start_location" placeholder="City, address, etc.">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="end_location" class="form-label">End Location</label>
+                        <input type="text" class="form-control" id="end_location" name="end_location" placeholder="City, address, etc.">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="seats" class="form-label">Seats Needed</label>
+                        <select class="form-select" id="seats" name="seats">
+                            <option value="1" selected>1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Available Rides</h3>
+            
+            {% if rides %}
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort By
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#" data-sort="date-asc">Date: Earliest First</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="date-desc">Date: Latest First</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="price-asc">Price: Low to High</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="price-desc">Price: High to Low</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Results -->
+        <div id="search-results">
+            {% if rides %}
+                {% for ride in rides %}
+                <div class="card mb-3 ride-card" data-price="{{ ride.price }}" data-date="{{ ride.departure_time.isoformat() }}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="me-3">
+                                        <span class="badge bg-primary p-2">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ ride.departure_time.strftime('%b %d, %Y') }}
+                                        </span>
+                                        <span class="badge bg-secondary p-2">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ ride.departure_time.strftime('%I:%M %p') }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success p-2">
+                                            <i class="fas fa-chair me-1"></i>
+                                            {{ ride.available_seats }} seat(s) available
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <h5 class="card-title">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>{{ ride.start_location }}
+                                    <i class="fas fa-arrow-right mx-2"></i>
+                                    <i class="fas fa-map-marker-alt text-success me-2"></i>{{ ride.end_location }}
+                                </h5>
+                                
+                                <p class="card-text text-muted">
+                                    Driver: {{ ride.driver.username if ride.driver else 'Unknown' }}
+                                    {% if ride.driver and ride.driver.reputation %}
+                                    <span class="ms-2">
+                                        <i class="fas fa-star text-warning"></i>
+                                        {{ ride.driver.reputation }}
+                                    </span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div class="col-md-3 text-end">
+                                <div class="price-box mb-3">
+                                    <span class="fw-bold fs-4">{{ ride.price }} ETH</span>
+                                    <div class="text-muted small">per seat</div>
+                                </div>
+                                
+                                <a href="{{ url_for('ride_details', ride_id=ride.id) }}" class="btn btn-primary w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-search fa-4x mb-3 text-muted"></i>
+                        <h4 class="text-muted">No rides found</h4>
+                        <p class="mb-4">Try adjusting your search criteria or offer a ride yourself!</p>
+                        <a href="{{ url_for('offer_ride') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Offer a Ride
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set date input default to today
+    document.getElementById('date').valueAsDate = new Date();
+    
+    // Ride sorting functionality
+    const sortLinks = document.querySelectorAll('[data-sort]');
+    const resultsContainer = document.getElementById('search-results');
+    
+    sortLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const sortMethod = this.getAttribute('data-sort');
+            const rideCards = Array.from(document.querySelectorAll('.ride-card'));
+            
+            // Sort rides based on selected method
+            rideCards.sort((a, b) => {
+                const aPrice = parseFloat(a.dataset.price);
+                const bPrice = parseFloat(b.dataset.price);
+                const aDate = new Date(a.dataset.date);
+                const bDate = new Date(b.dataset.date);
+                
+                switch (sortMethod) {
+                    case 'price-asc':
+                        return aPrice - bPrice;
+                    case 'price-desc':
+                        return bPrice - aPrice;
+                    case 'date-asc':
+                        return aDate - bDate;
+                    case 'date-desc':
+                        return bDate - aDate;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Update DOM
+            rideCards.forEach(card => {
+                resultsContainer.appendChild(card);
+            });
+        });
+    });
+</script>
+{% endblock %}

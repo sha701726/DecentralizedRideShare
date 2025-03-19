@@ -1,0 +1,184 @@
+/* Custom styles for DeCarpooling application */
+
+/* Root CSS variables that respect Bootstrap dark theme */
+:root {
+  --main-accent-color: #0d6efd;
+  --secondary-accent-color: #6f42c1;
+  --success-color: #198754;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --light-bg: #343a40;
+  --darker-bg: #212529;
+}
+
+/* Global elements */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+footer {
+  margin-top: auto;
+}
+
+/* Card styling */
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Ride cards */
+.ride-card {
+  border-left: 4px solid var(--main-accent-color);
+}
+
+.price-box {
+  padding: 10px;
+  background-color: var(--light-bg);
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* User profile elements */
+.profile-header {
+  background: linear-gradient(to right, var(--main-accent-color), var(--secondary-accent-color));
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Form elements */
+.form-control:focus {
+  border-color: var(--main-accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom buttons */
+.btn-blockchain {
+  background-color: #627eea; /* Ethereum color */
+  border-color: #627eea;
+  color: white;
+}
+
+.btn-blockchain:hover {
+  background-color: #4a67d8;
+  border-color: #4a67d8;
+  color: white;
+}
+
+/* Ethereum address display */
+.eth-address {
+  font-family: monospace;
+  background-color: var(--light-bg);
+  padding: 0.5rem;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Blockchain status indicators */
+.blockchain-verified {
+  border-left: 4px solid var(--success-color);
+}
+
+.blockchain-pending {
+  border-left: 4px solid var(--warning-color);
+}
+
+/* Override Bootstrap navbar for better dark theme integration */
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Ride details page */
+.route-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+.departure-time {
+  font-weight: bold;
+  color: var(--main-accent-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ride-card .row {
+    flex-direction: column;
+  }
+  
+  .ride-card .col-md-3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .ride-card .price-box {
+    margin-bottom: 0;
+  }
+}
+
+/* Animation for transactions */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.transaction-processing {
+  animation: pulse 1.5s infinite;
+}
+
+/* Tooltip customization */
+.tooltip {
+  opacity: 1;
+}
+
+.tooltip .tooltip-inner {
+  background-color: var(--darker-bg);
+  border: 1px solid var(--main-accent-color);
+}
+
+/* Blockchain validation badges */
+.blockchain-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+/* Rating stars */
+.star-rating .fas.fa-star, .star-rating .far.fa-star, .star-rating .fas.fa-star-half-alt {
+  color: var(--warning-color);
+}
+
+/* IPFS hash display */
+.ipfs-hash {
+  font-family: monospace;
+  word-break: break-all;
+  background-color: var(--light-bg);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
